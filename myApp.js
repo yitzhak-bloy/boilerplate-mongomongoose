@@ -13,7 +13,11 @@
 // as MONGO_URI. Connect to the database using the following syntax:
 //
 // mongoose.connect(<Your URI>, { useNewUrlParser: true, useUnifiedTopology: true }); 
+var mongoose = require('mongoose');
+require('dotenv').config()
+var Schema = mongoose.Schema;
 
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true }); 
 
 
 /** # SCHEMAS and MODELS #
@@ -41,7 +45,13 @@
 
 // <Your code here >
 
-var Person /* = <Your Model> */
+var personSchema = new Schema({
+  name : {type: String, required: true},
+  age: Number,
+  favoriteFoods: [String]
+});
+
+var Person = mongoose.model("Person", personSchema);
 
 // **Note**: Glitch is a real server, and in real servers interactions with
 // the db are placed in handler functions, to be called when some event happens
@@ -79,10 +89,14 @@ var Person /* = <Your Model> */
 // });
 
 var createAndSavePerson = function(done) {
-  
-  done(null /*, data*/);
+  var my = new Person({name: 'dani', age: 29, favoriteFoods: ['apple', 'orange']});
 
+  my.save((err, data) => {
+    if (err) return console.error(err);
+    done(null , data);
+  })
 };
+
 
 /** 4) Create many People with `Model.create()` */
 
@@ -93,10 +107,17 @@ var createAndSavePerson = function(done) {
 // Create many people using `Model.create()`, using the function argument
 // 'arrayOfPeople'.
 
-var createManyPeople = function(arrayOfPeople, done) {
-    
-    done(null/*, data*/);
-    
+const arrayOfPeople = [
+  {name: 'daniel', age: 56, favoriteFoods: ['apples', 'piza']}, 
+  {name: 'arik', age: 12, favoriteFoods: ['bamba', 'bisli']},
+  {name: 'shira', age: 69, favoriteFoods: ['kola', 'water']}
+];
+
+const createManyPeople = (arrayOfPeople, done) => {
+  Person.create(arrayOfPeople, (err, people) => {
+    if (err) return console.log(err);
+    done(null, people);
+  });
 };
 
 /** # C[R]UD part II - READ #
@@ -110,10 +131,11 @@ var createManyPeople = function(arrayOfPeople, done) {
 // It supports an extremely wide range of search options. Check it in the docs.
 // Use the function argument `personName` as search key.
 
-var findPeopleByName = function(personName, done) {
-  
-  done(null/*, data*/);
-
+var findPeopleByName = (personName, done) => {
+  Person.find({name: personName}, (err, personFound) => {
+    if (err) return console.log(err);
+    done(null, personFound);
+  })
 };
 
 /** 6) Use `Model.findOne()` */
@@ -126,9 +148,10 @@ var findPeopleByName = function(personName, done) {
 // argument `food` as search key
 
 var findOneByFood = function(food, done) {
-
-  done(null/*, data*/);
-  
+  Person.find({favoriteFoods: food}, (err, personFound) => {
+    if (err) return console.log(err);
+    done(null, personFound);
+  })
 };
 
 /** 7) Use `Model.findById()` */
